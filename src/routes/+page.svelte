@@ -1,19 +1,36 @@
 <script lang="ts">
 	import { isLoading, errorMessage } from '$lib/stores';
-	import { processBormeForDate } from '$lib/api';
+	import { processBormeForDate, getCompaniesByDate } from '$lib/api';
 	import { writable } from 'svelte/store';
 
 	let selectedDate: string = new Date().toISOString().split('T')[0];
 	const processingResult = writable<any>(null);
+            // --- NUEVO ESTADO PARA LA INTELIGENCIA DEL DÍA ---
+    const companiesOfTheDay = writable<any[]>([]);
+    let selectedCompanyForModal: any = null; // Controla si el modal está visible y qué compañía muestra
+
 
 	async function handleProcess() {
 		isLoading.set(true);
 		errorMessage.set(null);
 		processingResult.set(null);
+        companiesOfTheDay.set([]); // Limpia la lista de compañías anterior
 
 		try {
-			const response = await processBormeForDate(selectedDate);
-			processingResult.set(response.data);
+			const processResponse = await processBormeForDate(selectedDate);
+			processingResult.set(processResponse.data);
+
+            // --- !! MANIOBRA TÁCTICA CLAVE !! ---
+            // Si el procesamiento tuvo éxito y encontró compañías,
+            // inmediatamente hacemos una segunda llamada para recuperarlas.
+            if (processResponse.data.success && processResponse.data.companiesFound > 0) {
+                const companiesResponse = await getCompaniesByDate(0, 20, selectedDate);
+                if (companiesResponse.data.success) {
+                    companiesOfTheDay.set(companiesResponse.data.companies);
+                } else {
+                    errorMessage.set("Procesado con éxito, pero falló la recuperación de compañías.");
+                }
+            }
 		} catch (err: any) {
 			processingResult.set({
 				success: false,
@@ -59,12 +76,12 @@
 		{@const result = $processingResult}
 		<div
 			class="rounded-lg p-6 shadow-lg"
-			class:bg-green-900={result.success}
+			class:bg-gray-800={result.success}
 			class:border-green-700={result.success}
 			class:bg-red-900={!result.success}
 			class:border-red-700={!result.success}
 		>
-			<h2 class="mb-2 text-2xl font-bold">Informe de Misión</h2>
+			<h2 class="mb-2 text-2xl font-bold">Informe de Procesamiento</h2>
 			<p class="text-lg">
 				<strong class:text-green-300={result.success} class:text-red-300={!result.success}>
 					{result.success ? 'ÉXITO' : 'FALLO'}
@@ -78,6 +95,60 @@
 					<li>Compañías encontradas: {result.companiesFound}</li>
 				</ul>
 			{/if}
+            {#if result.fileUrls && result.fileUrls.length > 0}
+    <div class="mt-6">
+        <h3 class="text-xl font-semibold mb-3">Enlaces a ficheros procesados:</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+            {#each result.fileUrls as url}
+                <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block bg-gray-700 p-3 rounded-md text-stone-200 hover:bg-gray-600 hover:text-white transition duration-200 truncate"
+                    title={url.substring(url.lastIndexOf('/') + 1)}
+                >
+                    {url.substring(url.lastIndexOf('/') + 1)}
+                </a>
+            {/each}
+        </div>
+    </div>
+{/if}
+            {#if $companiesOfTheDay.length > 0}
+        <div class="mt-8">
+            <h2 class="text-3xl font-bold mb-4">Compañías Encontradas ({$processingResult?.companiesFound || 0})</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-gray-800 border border-gray-700">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Nombre</th>
+                            <th class="py-3 px-4 text-left">Objeto social</th>
+                            <th class="py-3 px-4 text-left">Fecha de constitución</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each $companiesOfTheDay as company}
+                            <tr class="hover:bg-gray-700 border-t border-gray-600">
+                                <td class="py-2 px-4 font-semibold">{company.name}</td>
+                                <td class="py-2 px-4">{company.object}</td>
+                                <td class="py-2 px-4">{company.startDate}</td>
+                                <td class="py-2 px-4">
+                                    <button
+                                        on:click={() => selectedCompanyForModal = company}
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md text-sm"
+                                    >
+                                        Ver Detalles
+                                    </button>
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {/if}
 		</div>
 	{/if}
 </div>

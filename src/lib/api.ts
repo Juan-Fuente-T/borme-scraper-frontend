@@ -17,3 +17,18 @@ export const processBormeForDate = (date: string) => {
 export const getAllCompanies = (page: number = 0, size: number = 20) => {
     return apiClient.get(`/companies/all?page=${page}&size=${size}`);
 };
+
+// Función para obtener una compañia por su ID
+export const getCompanyById = (id: number) => {
+    return apiClient.get(`/companies/${id}`);
+};
+
+// Función para obtener todas las compañías por fecha con paginación
+export const getCompaniesByDate = (page: number = 0, size: number = 20, date: string) => {
+    return apiClient.get(`/companies?date=${date}&page=${page}&size=${size}`);
+};
+
+// Función para obtener todas las publicaciones con paginación
+export const getPublications = (page: number = 0, size: number = 20) => {
+    return apiClient.get(`/publications?page=${page}&size=${size}`);
+};
