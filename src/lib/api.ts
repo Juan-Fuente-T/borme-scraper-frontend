@@ -29,6 +29,36 @@ export const getCompaniesByDate = (page: number = 0, size: number = 20, date: st
 };
 
 // Función para obtener todas las publicaciones con paginación
-export const getPublications = (page: number = 0, size: number = 20) => {
-    return apiClient.get(`/publications?page=${page}&size=${size}`);
+export const getPublications = (page: number = 0, size: number = 20, sort: string = 'publicationDate,desc') => {
+    // return apiClient.get(`/publications?page=${page}&size=${size}`);
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    params.append('sort', sort); // <-- Parámetro de ordenación
+
+    return apiClient.get(`/publications?${params.toString()}`);
+};
+
+export const searchCompanies = (
+    name: string | null,
+    admin: string | null,
+    solePartner: string | null,
+    startDate: string | null,
+    endDate: string | null,
+    page: number = 0,
+    size: number = 20,
+    sort: string = 'publication.publicationDate,desc' // <-- Valor por defecto
+) => {
+    // Construye los parámetros de la URL de forma segura.
+    const params = new URLSearchParams();
+    if (name) params.append('name', name);
+    if (admin) params.append('admin', admin);
+    if (solePartner) params.append('solePartner', solePartner);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    params.append('sort', sort); // <-- Parámetro de ordenación
+
+    return apiClient.get(`/companies/search?${params.toString()}`);
 };
