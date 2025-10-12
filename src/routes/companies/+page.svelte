@@ -4,6 +4,7 @@
 	import { searchCompanies } from '$lib/api';
 	import PaginationControls from '$lib/components/PaginationControls.svelte';
 	import '../../app.css';
+	import SortControls from '$lib/components/SortControls.svelte';
 
 	// Store de paginación
 	const pagination = createPaginationStore(30);
@@ -146,7 +147,7 @@
 			</div>
 		</form>
 		<div class="mt-4 flex items-center justify-between space-x-4 border-t border-gray-700 pt-4">
-			<div class="flex items-center space-x-4">
+			<!--<div class="flex items-center space-x-4">
 				<span class="font-semibold text-gray-400">Ordenar por:</span>
 				<button
 					on:click={() => handleSort('startDate')}
@@ -162,7 +163,16 @@
 				>
 					Capital {sortField === 'capitalNumeric' ? (sortDirection === 'desc' ? '↓' : '↑') : ''}
 				</button>
-			</div>
+			</div> -->
+            <SortControls
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                fields={[
+                    { value: 'startDate', label: 'Fecha' },
+                    { value: 'capitalNumeric', label: 'Capital' }
+                ]}
+            />
 			<button
 				on:click={clearFilters}
 				class="rounded-md bg-red-800 px-3 py-1 text-sm text-white transition hover:bg-red-700 cursor-pointer"

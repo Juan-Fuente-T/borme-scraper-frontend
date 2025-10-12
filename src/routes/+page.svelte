@@ -3,12 +3,16 @@
 	import { processBormeForDate, getCompaniesByDate } from '$lib/api';
 	import { writable } from 'svelte/store';
 	import CompanyModal from '$lib/components/CompanyModal.svelte';
+	import { createPaginationStore } from '$lib/stores';
+	import PaginationControls from '$lib/components/PaginationControls.svelte';
 
 	let selectedDate: string = new Date().toISOString().split('T')[0];
 	const processingResult = writable<any>(null);
 	// --- NUEVO ESTADO PARA DATOS DE COMPAÑIAS DEL DÍA ---
 	const companiesOfTheDay = writable<any[]>([]);
 	let selectedCompanyForModal: any = null; // Controla si el modal está visible y qué compañía muestra
+	// Store de paginación
+	const pagination = createPaginationStore(30);
 
 	async function handleProcess() {
 		isLoading.set(true);
@@ -23,12 +27,7 @@
 			// Si el procesamiento tuvo éxito y encontró compañías,
 			// inmediatamente hacemos una segunda llamada para recuperarlas.
 			if (processResponse.data.success && processResponse.data.companiesFound > 0) {
-				const companiesResponse = await getCompaniesByDate(0, 20, selectedDate);
-				if (companiesResponse.data.success) {
-					companiesOfTheDay.set(companiesResponse.data.companies);
-				} else {
-					errorMessage.set('Procesado con éxito, pero falló la recuperación de compañías.');
-				}
+				await loadCompaniesForDate(0);
 			}
 		} catch (err: any) {
 			processingResult.set({
@@ -39,6 +38,31 @@
 			isLoading.set(false);
 		}
 	}
+
+    async function loadCompaniesForDate(page: number) {
+    isLoading.set(true);
+    errorMessage.set(null);
+
+    try {
+        const response = await getCompaniesByDate(page, 20, selectedDate);
+
+        if (response.data.success) {
+            companiesOfTheDay.set(response.data.companies);  // ← Actualiza el store
+
+            pagination.updateFromResponse({
+                currentPage: response.data.currentPage,
+                totalPages: response.data.totalPages,
+                total: response.data.total
+            });
+        } else {
+            errorMessage.set('Error al cargar compañías.');
+        }
+    } catch (err: any) {
+        errorMessage.set('Error de conexión: ' + err.message);
+    } finally {
+        isLoading.set(false);
+    }
+}
 </script>
 
 {#if selectedCompanyForModal}
@@ -107,30 +131,38 @@
 					<h2 class="mb-4 text-3xl font-bold">
 						Compañías Encontradas ({$processingResult?.companiesFound || 0})
 					</h2>
+                    <PaginationControls
+                        currentPage={$pagination.currentPage}
+                        totalPages={$pagination.totalPages}
+                        totalElements={$pagination.totalElements}
+                        isLoading={$isLoading}
+                        onNext={() => loadCompaniesForDate($pagination.currentPage + 1)}
+                        onPrev={() => loadCompaniesForDate($pagination.currentPage - 1)}
+                    />
 					<div class="overflow-x-auto">
 						<table class="min-w-full border border-gray-700 bg-gray-800">
 							<thead class="bg-gray-700">
 								<tr>
-									<th class="px-4 py-3 text-left">Nombre</th>
-									<th class="px-4 py-3 text-left">Objeto social</th>
-									<th class="px-4 py-3 text-left">Capital social</th>
-									<th class="px-4 py-3 text-right">Fecha de constitución</th>
-									<th></th>
+									<th class="w-4/12 px-4 py-3 text-left">Nombre</th>
+									<th class="w-4/12 px-4 py-3 text-left">Objeto social</th>
+									<th class="w-1/12 px-4 py-3 text-left">Capital social</th>
+									<th class="w-1/12 px-4 py-3 text-right">Fecha de constitución</th>
+									<th class="w-1/12 px-4 py-3 text-right"></th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each $companiesOfTheDay as company}
 									<tr class="border-t border-gray-600 hover:bg-gray-700">
 										<td class="px-4 py-2 font-semibold">{company.name}</td>
-										<td class="px-4 py-2">{company.object}</td>
-										<td class="px-4 py-2">{company.capital}</td>
-										<td class="px-4 py-2 text-right">{company.startDate}</td>
+										<td class="px-4 py-2 font-mono text-md">{company.object}</td>
+										<td class="px-4 py-2 font-mono text-sm">{company.capital}</td>
+										<td class="px-4 py-2 text-right font-mono text-sm">{company.startDate}</td>
 										<td class="px-4 py-2">
 											<button
 												on:click={() => (selectedCompanyForModal = company)}
 												class="rounded-md bg-blue-600 px-3 py-1 text-sm font-bold text-white hover:bg-blue-700"
 											>
-												Ver Detalles
+												Ver Info
 											</button>
 										</td>
 									</tr>
@@ -144,7 +176,7 @@
 				<div class="mt-6">
 					<h3 class="mb-3 text-xl font-semibold">Enlaces a ficheros procesados:</h3>
 
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
 						{#each result.fileUrls as url}
 							<a
 								href={url}
