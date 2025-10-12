@@ -2,6 +2,7 @@
 	import { isLoading, errorMessage } from '$lib/stores';
 	import { processBormeForDate, getCompaniesByDate } from '$lib/api';
 	import { writable } from 'svelte/store';
+	import CompanyModal from '$lib/components/CompanyModal.svelte';
 
 	let selectedDate: string = new Date().toISOString().split('T')[0];
 	const processingResult = writable<any>(null);
@@ -39,6 +40,13 @@
 		}
 	}
 </script>
+
+{#if selectedCompanyForModal}
+    <CompanyModal
+        company={selectedCompanyForModal}
+        onClose={() => selectedCompanyForModal = null}
+    />
+{/if}
 
 <div class="container mx-auto">
 	<h1 class="mb-6 border-b border-gray-700 pb-2 text-4xl font-bold">Dashboard de Procesamiento</h1>
@@ -105,7 +113,8 @@
 								<tr>
 									<th class="px-4 py-3 text-left">Nombre</th>
 									<th class="px-4 py-3 text-left">Objeto social</th>
-									<th class="px-4 py-3 text-left">Fecha de constitución</th>
+									<th class="px-4 py-3 text-left">Capital social</th>
+									<th class="px-4 py-3 text-right">Fecha de constitución</th>
 									<th></th>
 								</tr>
 							</thead>
@@ -114,7 +123,8 @@
 									<tr class="border-t border-gray-600 hover:bg-gray-700">
 										<td class="px-4 py-2 font-semibold">{company.name}</td>
 										<td class="px-4 py-2">{company.object}</td>
-										<td class="px-4 py-2">{company.startDate}</td>
+										<td class="px-4 py-2">{company.capital}</td>
+										<td class="px-4 py-2 text-right">{company.startDate}</td>
 										<td class="px-4 py-2">
 											<button
 												on:click={() => (selectedCompanyForModal = company)}
