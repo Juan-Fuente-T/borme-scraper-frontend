@@ -147,23 +147,6 @@
 			</div>
 		</form>
 		<div class="mt-4 flex items-center justify-between space-x-4 border-t border-gray-700 pt-4">
-			<!--<div class="flex items-center space-x-4">
-				<span class="font-semibold text-gray-400">Ordenar por:</span>
-				<button
-					on:click={() => handleSort('startDate')}
-					class="rounded-md bg-gray-700 px-3 py-1 text-sm text-white transition hover:bg-gray-600 cursor-pointer"
-					class:!bg-blue-600={sortField === 'startDate'}
-				>
-					Fecha {sortField === 'startDate' ? (sortDirection === 'desc' ? '↓' : '↑') : ''}
-				</button>
-				<button
-					on:click={() => handleSort('capitalNumeric')}
-					class="rounded-md bg-gray-700 px-3 py-1 text-sm text-white transition hover:bg-gray-600 cursor-pointer"
-					class:!bg-blue-600={sortField === 'capitalNumeric'}
-				>
-					Capital {sortField === 'capitalNumeric' ? (sortDirection === 'desc' ? '↓' : '↑') : ''}
-				</button>
-			</div> -->
             <SortControls
                 sortField={sortField}
                 sortDirection={sortDirection}

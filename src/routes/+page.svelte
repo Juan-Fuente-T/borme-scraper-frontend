@@ -5,14 +5,17 @@
 	import CompanyModal from '$lib/components/CompanyModal.svelte';
 	import { createPaginationStore } from '$lib/stores';
 	import PaginationControls from '$lib/components/PaginationControls.svelte';
+	import SortControls from '$lib/components/SortControls.svelte';
 
 	let selectedDate: string = new Date().toISOString().split('T')[0];
 	const processingResult = writable<any>(null);
-	// --- NUEVO ESTADO PARA DATOS DE COMPAÑIAS DEL DÍA ---
+	// --- ESTADO PARA DATOS DE COMPAÑIAS DEL DÍA ---
 	const companiesOfTheDay = writable<any[]>([]);
 	let selectedCompanyForModal: any = null; // Controla si el modal está visible y qué compañía muestra
 	// Store de paginación
 	const pagination = createPaginationStore(30);
+    let sortDirection = 'desc'; // Estado inicial
+	let sortField = 'startDate'; // Campo por el que se ordena
 
 	async function handleProcess() {
 		isLoading.set(true);
@@ -24,8 +27,7 @@
 			const processResponse = await processBormeForDate(selectedDate);
 			processingResult.set(processResponse.data);
 
-			// Si el procesamiento tuvo éxito y encontró compañías,
-			// inmediatamente hacemos una segunda llamada para recuperarlas.
+			// Si resulto un éxito inmediatamente hace una segunda llamada para recuperar datos.
 			if (processResponse.data.success && processResponse.data.companiesFound > 0) {
 				await loadCompaniesForDate(0);
 			}
@@ -43,8 +45,10 @@
     isLoading.set(true);
     errorMessage.set(null);
 
+    const sortParam = `${sortField},${sortDirection}`; // <-- Parametros de ordenacion
+
     try {
-        const response = await getCompaniesByDate(page, 20, selectedDate);
+        const response = await getCompaniesByDate(selectedDate, page, 20, sortParam);
 
         if (response.data.success) {
             companiesOfTheDay.set(response.data.companies);  // ← Actualiza el store
@@ -63,6 +67,18 @@
         isLoading.set(false);
     }
 }
+
+	function handleSort(field: string) {
+		if (sortField === field) {
+			// Si ya está ordenado por este campo, se invierte la dirección.
+			sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+		} else {
+			// Si es un campo nuevo, se establece y se resetea a 'desc'.
+			sortField = field;
+			sortDirection = 'desc';
+		}
+		loadCompaniesForDate(0); // Se vuelve a buscar con la nueva ordenación.
+	}
 </script>
 
 {#if selectedCompanyForModal}
@@ -131,6 +147,15 @@
 					<h2 class="mb-4 text-3xl font-bold">
 						Compañías Encontradas ({$processingResult?.companiesFound || 0})
 					</h2>
+                    <SortControls
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        fields={[
+                            { value: 'startDate', label: 'Fecha' },
+                            { value: 'capitalNumeric', label: 'Capital' }
+                        ]}
+                    />
                     <PaginationControls
                         currentPage={$pagination.currentPage}
                         totalPages={$pagination.totalPages}

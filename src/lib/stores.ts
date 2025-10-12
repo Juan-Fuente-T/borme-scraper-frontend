@@ -22,6 +22,11 @@ export interface PaginationState {
     pageSize: number;
 }
 
+interface AuthState {
+    isAuthenticated: boolean;
+    username: string | null;
+}
+
 // ==================== STORES GLOBALES ====================
 // Lista de compañías
 export const companies = writable<Company[]>([]);
@@ -34,6 +39,15 @@ export const isLoading = writable(false);
 
 // Guarda cualquier mensaje de error
 export const errorMessage = writable<string | null>(null);
+
+// ==================== AUTH ====================
+
+export const auth = writable<AuthState>({
+    isAuthenticated: false,
+    username: null
+});
+
+// export const authToken = writable<string | null>(null);
 
 // ==================== FACTORY DE PAGINACIÓN ====================
 export function createPaginationStore(initialPageSize: number = 20) {
