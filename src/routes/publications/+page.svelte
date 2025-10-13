@@ -45,12 +45,12 @@
 		}
 	}
 
-function toggleSortDirection() {
-    // Invierte la dirección actual.
-    sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
-    // Vuelve a lanzar la búsqueda desde la página 0.
-    fetchPublications(0);
-}
+	function toggleSortDirection() {
+		// Invierte la dirección actual.
+		sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+		// Vuelve a lanzar la búsqueda desde la página 0.
+		fetchPublications(0);
+	}
 
 	// Carga de la primera página al iniciar el componente.
 	onMount(() => {
@@ -73,11 +73,11 @@ function toggleSortDirection() {
 			<span class="block sm:inline">{$errorMessage}</span>
 		</div>
 	{:else if $publications.length > 0}
-		<div class="flex items-center space-x-4 p-4 justify-end">
+		<div class="flex items-center justify-end space-x-4 p-4">
 			<span class="font-semibold text-gray-400">Ordenar por:</span>
 			<button
 				on:click={toggleSortDirection}
-                class="bg-blue-600 hover:bg-blue-500 text-white py-1 px-3 rounded-md text-sm transition cursor-pointer"
+				class="cursor-pointer rounded-md bg-blue-600 px-3 py-1 text-sm text-white transition hover:bg-blue-500"
 			>
 				Fecha {sortDirection === 'desc' ? '↓' : '↑'}
 			</button>
@@ -95,9 +95,9 @@ function toggleSortDirection() {
 				<thead class="bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left">Documento ID</th>
-						<th class="px-4 py-3 text-left">Nombre</th>
+						<!-- <th class="px-4 py-3 text-left">Nombre</th> -->
 						<th class="px-4 py-3 text-left">Fecha de publicación</th>
-						<th class="px-4 py-3 text-left">Url</th>
+						<th class="px-4 py-3 text-center">Url</th>
 					</tr>
 				</thead>
 
@@ -105,9 +105,18 @@ function toggleSortDirection() {
 					{#each $publications as publication}
 						<tr class="border-t border-gray-600 hover:bg-gray-700">
 							<td class="px-4 py-2">{publication.id}</td>
-							<td class="px-4 py-2 font-semibold">{publication.filename}</td>
+							<!-- <td class="px-4 py-2 font-semibold">{publication.filename}</td> -->
 							<td class="px-4 py-2">{publication.publicationDate}</td>
-							<td class="px-4 py-2">{publication.fileUrl}</td>
+							<td class="px-4 py-2 text-right">
+								<a
+									href={publication.fileUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-blue-400 hover:text-blue-300 hover:underline"
+								>
+									{publication.fileUrl}
+								</a>
+							</td>
 						</tr>
 					{/each}
 				</tbody>

@@ -7,6 +7,7 @@ interface Company {
     object: string;
     capital: string;
     startDate: string;
+    admin: string;
 }
 interface Publication {
     id: number;

@@ -1,8 +1,6 @@
 import axios from 'axios';
-// import { get } from 'svelte/store';
 
 let basicAuthToken: string | null = null;
-
 
 // La URL base de la API de Spring Boot
 const apiClient = axios.create({
@@ -42,22 +40,30 @@ export const verifyLogin = () => {
     return apiClient.get('/auth/me');
 };
 
-// Función para procesar el BORME de una fecha
+/**
+ * Función para procesar el BORME de una fecha
+ */
 export const processBormeForDate = (date: string) => {
     return apiClient.post(`/borme/process?date=${date}`);
 };
 
-// Función para obtener todas las compañías con paginación
+/**
+ * Función para obtener todas las compañías con paginación
+ */
 export const getAllCompanies = (page: number = 0, size: number = 20) => {
     return apiClient.get(`/borme/companies/all?page=${page}&size=${size}`);
 };
 
-// Función para obtener una compañia por su ID
+/**
+ * Función para obtener una compañia por su ID
+ */
 export const getCompanyById = (id: number) => {
     return apiClient.get(`/borme/companies/${id}`);
 };
 
-// Función para obtener todas las compañías por fecha con paginación
+/**
+ * Función para obtener todas las compañías por fecha con paginación
+ */
 export const getCompaniesByDate = (date: string, page: number = 0, size: number = 20, sort: string = 'startDate,desc') => {
     // return apiClient.get(`/companies?date=${date}&page=${page}&size=${size}`);
     const params = new URLSearchParams();
@@ -68,7 +74,9 @@ export const getCompaniesByDate = (date: string, page: number = 0, size: number 
     return apiClient.get(`/borme/companies?${params.toString()}`);
 };
 
-// Función para obtener todas las publicaciones con paginación
+/**
+ * Función para obtener todas las publicaciones con paginación
+ */
 export const getPublications = (page: number = 0, size: number = 20, sort: string = 'publicationDate,desc') => {
     // return apiClient.get(`/publications?page=${page}&size=${size}`);
     const params = new URLSearchParams();
@@ -79,6 +87,18 @@ export const getPublications = (page: number = 0, size: number = 20, sort: strin
     return apiClient.get(`/borme/publications?${params.toString()}`);
 };
 
+/**
+ * Pide los bytes de un PDF como un 'blob' binario.
+ */
+export const getPublicationPdf = (id: number) => {
+    return apiClient.get(`/borme/publications/proxy/${id}`, {
+        responseType: 'blob' // <-- Trae los datos en bruto
+    });
+};
+
+/**
+ * Funcion para obtener todas las compañías con filtros de búsqueda y paginación
+ */
 export const searchCompanies = (
     name: string | null,
     admin: string | null,
@@ -102,34 +122,3 @@ export const searchCompanies = (
 
     return apiClient.get(`/borme/companies/search?${params.toString()}`);
 };
-
-// export async function login(username: string, password: string) {
-//     const credentials = btoa(`${username}:${password}`);
-
-//     const response = await fetch('http://localhost:8080/api/auth/login', {
-//         method: 'POST',
-//         headers: {
-//             'Authorization': `Basic ${credentials}`,
-//             'Content-Type': 'application/json'
-//         }
-//     });
-    
-//     if (response.ok) {
-//         return { success: true, token: credentials, data: await response.json() };
-//     }
-    
-//     return { success: false, data: await response.json() };
-// }
-
-// function getAuthHeaders() {
-//     const token = get(authToken);
-//     if (token) {
-//         return {
-//             'Authorization': `Basic ${token}`,
-//             'Content-Type': 'application/json'
-//         };
-//     }
-//     return {
-//         'Content-Type': 'application/json'
-//     };
-// }

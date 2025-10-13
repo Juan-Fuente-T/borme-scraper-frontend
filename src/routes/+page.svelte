@@ -28,7 +28,8 @@
 			processingResult.set(processResponse.data);
 
 			// Si resulto un éxito inmediatamente hace una segunda llamada para recuperar datos.
-			if (processResponse.data.success && processResponse.data.companiesFound > 0) {
+			// if (processResponse.data.success && processResponse.data.companiesFound > 0) {
+			if (processResponse.data.success) {
 				await loadCompaniesForDate(0);
 			}
 		} catch (err: any) {

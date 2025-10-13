@@ -5,6 +5,7 @@
 	import PaginationControls from '$lib/components/PaginationControls.svelte';
 	import '../../app.css';
 	import SortControls from '$lib/components/SortControls.svelte';
+    import CompanyModal from '$lib/components/CompanyModal.svelte';
 
 	// Store de paginación
 	const pagination = createPaginationStore(30);
@@ -17,6 +18,8 @@
 	let solePartnerFilter: string | null = null;
 	let startDateFilter: string | null = null;
 	let endDateFilter: string | null = null;
+
+    let selectedCompanyForModal: any = null;
 
 	async function performSearch(pageToFetch: number = 0) {
 		isLoading.set(true);
@@ -82,6 +85,13 @@
 
 <div class="container mx-auto min-h-screen bg-gray-900 p-8 text-gray-200">
 	<h1 class="mb-6 border-b border-gray-700 pb-2 text-4xl font-bold">Directorio de Compañías</h1>
+
+    {#if selectedCompanyForModal}
+        <CompanyModal
+            company={selectedCompanyForModal}
+            onClose={() => selectedCompanyForModal = null}
+        />
+    {/if}
 
 	<div class="mb-6 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-lg">
 		<form
@@ -191,18 +201,21 @@
 					<tr>
 						<th class="w-1/12 px-4 py-3 text-left">BORME ID</th>
 						<th class="w-4/12 px-4 py-3 text-left">Nombre</th>
-						<th class="w-4/12 px-4 py-3 text-left">Objeto Social</th>
+						<th class="w-4/12 px-4 py-3 text-left">Administrador</th>
 						<th class="w-2/12 px-4 py-3 text-right">Capital</th>
 						<th class="w-1/12 px-4 py-3 text-right">Fecha Constitución</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each $companies as company}
-						<tr class="border-t border-gray-600 hover:bg-gray-700">
+						<tr class="border-t border-gray-600 hover:bg-gray-700 cursor-pointer"
+                        on:click={() => selectedCompanyForModal = company}
+                        >
 							<td class="px-4 py-2 font-mono text-sm text-gray-400">{company.bormeId}</td>
 							<td class="px-4 py-2 font-semibold">{company.name}</td>
 
-							<td class="truncate px-4 py-2" title={company.object}>{company.object}</td>
+							<!-- <td class="truncate px-4 py-2" title={company.object}>{company.object}</td> -->
+							<td class="truncate px-4 py-2" title={company.admin}>{company.admin}</td>
 
 							<td class="px-4 py-2 text-right font-mono text-sm">{company.capital}</td>
 							<td class="px-4 py-2 text-right font-mono text-sm">{company.startDate}</td>
