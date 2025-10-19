@@ -5,7 +5,7 @@ let basicAuthToken: string | null = null;
 // La URL base de la API de Spring Boot
 const apiClient = axios.create({
     // baseURL: 'http://localhost:8080/api', // O la variable de entorno
-    baseURL: import.meta.env.VITE_API_BASE_URL + '/api/borme',
+    baseURL: import.meta.env.VITE_API_BASE_URL + '/api',
     headers: { 'Content-Type': 'application/json' }
 });
 
